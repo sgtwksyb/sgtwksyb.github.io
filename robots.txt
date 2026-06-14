@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /
+X-robots-tag: noindex, nofollow
