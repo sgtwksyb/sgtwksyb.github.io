@@ -16,7 +16,6 @@
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
-            /* 👇 ズーム禁止をさらに確実にするCSS（ダブルタップズーム等を抑制） */
             touch-action: manipulation;
         }
 
@@ -76,42 +75,33 @@
         .tab-btn.active {
             opacity: 1;
         }
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 0px;
-            background-color: #000000;
-        }
 
-        /* 👇 2. 戻るボタンを画面上部に固定する設定 */
+        /* 戻るボタン（画面上部に固定） */
         .back-btn {
             display: none;
-            position: fixed;        /* 画面に固定 */
+            position: fixed;
             left: 0;
             top: 0;
-            width: 100%;            /* 横幅いっぱいのバーにする */
-            background-color: rgba(255, 255, 255, 0.95); /* 背景を白（少しだけ透けさせる） */
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
             border: none;
             border-bottom: 1px solid #eeeeee;
             font-size: 16px;
             cursor: pointer;
             font-weight: 300;
-            padding: 15px 20px;     /* 押しやすいように内側に広めの余白 */
-            text-align: left;       /* 文字を左寄せに */
-            z-index: 1000;          /* 画像より手前に表示 */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* ほんのり影をつけて立体感を出す */
+            padding: 15px 20px;
+            text-align: left;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        /* ギャラリー部分（全体コンテナ） */
+        /* ギャラリー部分 */
         .gallery-container {
             width: 100%;
             max-width: 100%;
         }
 
-        /* ① 一覧モード（タイル状に並ぶ） */
+        /* ① 一覧モード */
         .list-view {
             display: none;
             gap: 0;
@@ -148,7 +138,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            padding-top: 50px; /* 👇 戻るボタンのバーと被らないように上に隙間をあける */
+            padding-top: 50px;
         }
         .detail-view.active {
             display: flex;
@@ -188,65 +178,81 @@
         </div>
     </div>
 
-    <div class="gallery-container">
-
-        <div id="list-tab-a" class="list-view active">
-            <div class="gallery-item" onclick="showDetailView('detail-tab-a', 0)"><img src="patirisutohakama.PNG" alt="作品"></div>
-            <div class="gallery-item" onclick="showDetailView('detail-tab-a', 1)"><img src="pickp_nuoh.JPG" alt="作品"></div>
-        </div>
-
-        <div id="list-tab-b" class="list-view">
-            <div class="gallery-item" onclick="showDetailView('detail-tab-b', 0)"><img src="sg_sketch.png" alt="作品"></div>
-            <div class="gallery-item" onclick="showDetailView('detail-tab-b', 1)"><img src="水濡れ乾.PNG" alt="作品"></div>
-        </div>
-
-        <div id="list-tab-c" class="list-view">
-            <div class="gallery-item" onclick="showDetailView('detail-tab-c', 0)"><img src="手持ち燭台と夜.jpg" alt="作品"></div>
-            <div class="gallery-item" onclick="showDetailView('detail-tab-c', 1)"><img src="工場夜景とモクロー.JPG" alt="作品"></div>
-        </div>
-
-        <div id="detail-tab-a" class="detail-view">
-            <div class="detail-item" id="img-tab-a-0"><img src="patirisutohakama.PNG" alt="作品"></div>
-            <div class="detail-item" id="img-tab-a-1"><img src="pickp_nuoh.JPG" alt="作品"></div>
-        </div>
-
-        <div id="detail-tab-b" class="detail-view">
-            <div class="detail-item" id="img-tab-b-0"><img src="sg_sketch.png" alt="作品"></div>
-            <div class="detail-item" id="img-tab-b-1"><img src="水濡れ乾.PNG" alt="作品"></div>
-        </div>
-
-        <div id="detail-tab-c" class="detail-view">
-            <div class="detail-item" id="img-tab-c-0"><img src="手持ち燭台と夜.jpg" alt="作品"></div>
-            <div class="detail-item" id="img-tab-c-1"><img src="工場夜景とモクロー.JPG" alt="作品"></div>
-        </div>
-
-    </div>
+    <div class="gallery-container" id="gallery-box"></div>
 
     <script>
-        let currentTab = 'tab-a'; 
-        let isDetailMode = false; // 👇 今、詳細モードかどうかのフラグ
+        // ==========================================
+        // ✨ ここに画像を1回ずつ登録するだけでOK！ ✨
+        // ==========================================
+        const artworkData = {
+            'tab-a': [
+                'patirisutohakama.PNG',
+                'pickp_nuoh.JPG'
+            ],
+            'tab-b': [
+                'sg_sketch.png',
+                '水濡れ乾.PNG'
+            ],
+            'tab-c': [
+                '手持ち燭台と夜.jpg',
+                '工場夜景とモクロー.JPG'
+            ]
+        };
+
+        // ページを開いた瞬間に、上のデータからHTMLを自動で作り出す仕組み
+        const galleryBox = document.getElementById('gallery-box');
         
-        // 👇 スワイプ検知用の変数
+        Object.keys(artworkData).forEach((tabId, tabIndex) => {
+            const isFirst = tabIndex === 0 ? 'active' : '';
+
+            // 一覧モード用の枠を作る
+            const listView = document.createElement('div');
+            listView.id = `list-${tabId}`;
+            listView.className = `list-view ${isFirst}`;
+
+            // 詳細モード用の枠を作る
+            const detailView = document.createElement('div');
+            detailView.id = `detail-${tabId}`;
+            detailView.className = `detail-view`;
+
+            // 画像を1枚ずつ流し込んでいく
+            artworkData[tabId].forEach((imgSrc, imgIndex) => {
+                // 一覧用のタイルを生成
+                listView.innerHTML += `
+                    <div class="gallery-item" onclick="showDetailView('detail-${tabId}', ${imgIndex})">
+                        <img src="${imgSrc}" alt="作品">
+                    </div>
+                `;
+                // 詳細用のインスタ風パーツを生成
+                detailView.innerHTML += `
+                    <div class="detail-item" id="img-${tabId}-${imgIndex}">
+                        <img src="${imgSrc}" alt="作品">
+                    </div>
+                `;
+            });
+
+            galleryBox.appendChild(listView);
+            galleryBox.appendChild(detailView);
+        });
+
+        // ==========================================
+        // 画面切り替え・スワイプの仕組み（前と同じ！）
+        // ==========================================
+        let currentTab = 'tab-a'; 
+        let isDetailMode = false; 
         let touchStartX = 0;
         let touchStartY = 0;
 
-        // タブを切り替える
         function switchTab(tabId) {
             currentTab = tabId;
-            
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.list-view').forEach(content => content.classList.remove('active'));
-
-            const clickedBtn = event.currentTarget;
-            clickedBtn.classList.add('active');
-
+            event.currentTarget.classList.add('active');
             document.getElementById('list-' + tabId).classList.add('active');
         }
 
-        // 詳細モードに切り替える
         function showDetailView(detailTabId, imgIndex) {
-            isDetailMode = true; // 詳細モードON
-            
+            isDetailMode = true;
             document.querySelectorAll('.list-view').forEach(content => content.classList.remove('active'));
             document.getElementById('tabs-menu').style.display = 'none';
             document.getElementById('back-btn').style.display = 'block';
@@ -260,34 +266,26 @@
             }
         }
 
-        // 一覧モードに戻る
         function showListView() {
-            isDetailMode = false; // 詳細モードOFF
-            
+            isDetailMode = false;
             document.querySelectorAll('.detail-view').forEach(content => content.classList.remove('active'));
             document.getElementById('back-btn').style.display = 'none';
             document.getElementById('tabs-menu').style.display = 'flex';
-
             document.getElementById('list-' + currentTab).classList.add('active');
         }
 
-        // ==================== 3. 左から右へのスワイプ戻り機能 ====================
         window.addEventListener('touchstart', function(e) {
-            if (!isDetailMode) return; // 詳細モードのときだけ動かす
+            if (!isDetailMode) return;
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         }, {passive: true});
 
         window.addEventListener('touchend', function(e) {
             if (!isDetailMode) return;
-
             let touchEndX = e.changedTouches[0].clientX;
             let touchEndY = e.changedTouches[0].clientY;
-
             let diffX = touchEndX - touchStartX;
             let diffY = touchEndY - touchStartY;
-
-            // 左右のスワイプ量が上下より多く、かつ左から右へ「50ピクセル以上」スワイプされたら実行
             if (diffX > 50 && Math.abs(diffX) > Math.abs(diffY)) {
                 showListView();
             }
