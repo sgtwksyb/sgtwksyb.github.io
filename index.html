@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>アーカイブ</title>
+    <title>とりのポートフォリオ</title>
     <style>
-        /* 全体の基本設定 */
+        /* ==========================================
+           基本設定（ライトモード用・今まで通り）
+           ========================================== */
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: #ffffff;
@@ -19,7 +21,7 @@
             touch-action: manipulation;
         }
 
-        /* ヘッダー（アイコンとSNS） */
+        /* ヘッダー */
         .header {
             display: flex;
             align-items: center;
@@ -50,7 +52,7 @@
             font-weight: 300;
         }
 
-        /* タブ・ボタン共通のコンテナ */
+        /* タブ・ボタン共通 */
         .tabs-container {
             width: 100%;
             max-width: 800px;
@@ -93,6 +95,7 @@
             text-align: left;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            color: #333333; /* 文字色を指定 */
         }
 
         /* ギャラリー部分 */
@@ -154,6 +157,35 @@
             height: auto;
             display: block;
         }
+
+        /* ==========================================
+           ✨ 3. ダークモード検知時の設定を追加 ✨
+           ========================================== */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #000000; /* 背景を真っ黒に */
+                color: #ffffff;           /* 全体の文字を白に */
+            }
+
+            .sns-links a {
+                color: #66b3ff;           /* ダークモードで見えやすい明るい青に */
+            }
+
+            .back-btn {
+                background-color: rgba(0, 0, 0, 0.95); /* 戻るバーの背景を黒に */
+                border-bottom: 1px solid #333333;     /* 線の色を暗く */
+                color: #ffffff;                       /* 戻る文字を白に */
+                box-shadow: 0 2px 5px rgba(255,255,255,0.05);
+            }
+
+            .gallery-item {
+                background-color: #1a1a1a; /* 画像読み込み前の背景を暗いグレーに */
+            }
+
+            .detail-item {
+                background-color: #000000; /* 詳細モードの画像の外枠も真っ黒に */
+            }
+        }
     </style>
 </head>
 <body>
@@ -181,9 +213,6 @@
     <div class="gallery-container" id="gallery-box"></div>
 
     <script>
-        // ==========================================
-        // ✨ ここに画像を1回ずつ登録するだけでOK！ ✨
-        // ==========================================
         const artworkData = {
             'tab-a': [
                 'patirisutohakama.PNG',
@@ -199,31 +228,25 @@
             ]
         };
 
-        // ページを開いた瞬間に、上のデータからHTMLを自動で作り出す仕組み
         const galleryBox = document.getElementById('gallery-box');
         
         Object.keys(artworkData).forEach((tabId, tabIndex) => {
             const isFirst = tabIndex === 0 ? 'active' : '';
 
-            // 一覧モード用の枠を作る
             const listView = document.createElement('div');
             listView.id = `list-${tabId}`;
             listView.className = `list-view ${isFirst}`;
 
-            // 詳細モード用の枠を作る
             const detailView = document.createElement('div');
             detailView.id = `detail-${tabId}`;
             detailView.className = `detail-view`;
 
-            // 画像を1枚ずつ流し込んでいく
             artworkData[tabId].forEach((imgSrc, imgIndex) => {
-                // 一覧用のタイルを生成
                 listView.innerHTML += `
                     <div class="gallery-item" onclick="showDetailView('detail-${tabId}', ${imgIndex})">
                         <img src="${imgSrc}" alt="作品">
                     </div>
                 `;
-                // 詳細用のインスタ風パーツを生成
                 detailView.innerHTML += `
                     <div class="detail-item" id="img-${tabId}-${imgIndex}">
                         <img src="${imgSrc}" alt="作品">
@@ -235,9 +258,6 @@
             galleryBox.appendChild(detailView);
         });
 
-        // ==========================================
-        // 画面切り替え・スワイプの仕組み（前と同じ！）
-        // ==========================================
         let currentTab = 'tab-a'; 
         let isDetailMode = false; 
         let touchStartX = 0;
