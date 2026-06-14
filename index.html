@@ -11,12 +11,11 @@
             background-color: #ffffff;
             color: #333333;
             margin: 0;
-            padding: 20px;
+            padding: 20px 0;      /* 👈 上下は20px、左右は「0」にして画面いっぱいに！ */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         /* ヘッダー（アイコンとSNS） */
         .header {
             display: flex;
@@ -25,6 +24,8 @@
             max-width: 800px;
             gap: 20px;
             margin-bottom: 30px;
+            padding: 0 20px;     /* 👈 ヘッダーだけ左右に少し余白を入れて見やすくする */
+            box-sizing: border-box; /* 余白を計算に含める設定 */
         }
         .profile-icon {
             width: 80px;
@@ -84,7 +85,7 @@
         /* ギャラリー部分（2x4などのタイル並び） */
         .gallery-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 100%;
         }
         .gallery-content {
             display: none;
