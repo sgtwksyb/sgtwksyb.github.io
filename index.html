@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>とりのポートフォリオ</title>
     <style>
         /* 全体の基本設定 */
@@ -15,7 +15,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;  /* 👈 これを追加！画面からはみ出た部分を非表示にして横スクロールを強制ストップさせる魔法の呪文 */
+            overflow-x: hidden;
+            /* 👇 ズーム禁止をさらに確実にするCSS（ダブルタップズーム等を抑制） */
+            touch-action: manipulation;
         }
 
         /* ヘッダー（アイコンとSNS） */
@@ -49,7 +51,7 @@
             font-weight: 300;
         }
 
-        /* タブ部分 */
+        /* タブ・ボタン共通のコンテナ */
         .tabs-container {
             width: 100%;
             max-width: 800px;
@@ -84,17 +86,23 @@
             background-color: #000000;
         }
 
-        /* 戻るボタン（詳細モードの時に左上に出す） */
+        /* 👇 2. 戻るボタンを画面上部に固定する設定 */
         .back-btn {
             display: none;
-            position: absolute;
-            left: 20px;
-            top: 10px;
-            background: none;
+            position: fixed;        /* 画面に固定 */
+            left: 0;
+            top: 0;
+            width: 100%;            /* 横幅いっぱいのバーにする */
+            background-color: rgba(255, 255, 255, 0.95); /* 背景を白（少しだけ透けさせる） */
             border: none;
+            border-bottom: 1px solid #eeeeee;
             font-size: 16px;
             cursor: pointer;
             font-weight: 300;
+            padding: 15px 20px;     /* 押しやすいように内側に広めの余白 */
+            text-align: left;       /* 文字を左寄せに */
+            z-index: 1000;          /* 画像より手前に表示 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* ほんのり影をつけて立体感を出す */
         }
 
         /* ギャラリー部分（全体コンテナ） */
@@ -107,14 +115,14 @@
         .list-view {
             display: none;
             gap: 0;
-            grid-template-columns: repeat(3, 1fr); /* スマホは横3列 */
+            grid-template-columns: repeat(3, 1fr);
         }
         .list-view.active {
             display: grid;
         }
         @media (min-width: 768px) {
             .list-view {
-                grid-template-columns: repeat(5, 1fr); /* PCは横5列 */
+                grid-template-columns: repeat(5, 1fr);
             }
         }
         .gallery-item {
@@ -134,25 +142,26 @@
             transform: scale(1.05);
         }
 
-        /* ② 詳細モード（インスタのフィード風：縦1列でオリジナル比率） */
+        /* ② 詳細モード */
         .detail-view {
             display: none;
             flex-direction: column;
             align-items: center;
             width: 100%;
+            padding-top: 50px; /* 👇 戻るボタンのバーと被らないように上に隙間をあける */
         }
         .detail-view.active {
             display: flex;
         }
         .detail-item {
             width: 100%;
-            max-width: 600px; /* インスタの画像っぽく見やすい最大幅に制限 */
+            max-width: 600px;
             margin-bottom: 20px;
             background-color: #ffffff;
         }
         .detail-item img {
             width: 100%;
-            height: auto; /* 縦横比をオリジナルに保つ */
+            height: auto;
             display: block;
         }
     </style>
@@ -171,7 +180,7 @@
     </div>
 
     <div class="tabs-container">
-        <button id="back-btn" class="back-btn" onclick="showListView()">back</button>
+        <button id="back-btn" class="back-btn" onclick="showListView()">← back</button>
         <div id="tabs-menu" class="tabs">
             <button class="tab-btn active" onclick="switchTab('tab-a')">🧸</button>
             <button class="tab-btn" onclick="switchTab('tab-b')">🎨</button>
@@ -196,7 +205,6 @@
             <div class="gallery-item" onclick="showDetailView('detail-tab-c', 1)"><img src="工場夜景とモクロー.JPG" alt="作品"></div>
         </div>
 
-
         <div id="detail-tab-a" class="detail-view">
             <div class="detail-item" id="img-tab-a-0"><img src="patirisutohakama.PNG" alt="作品"></div>
             <div class="detail-item" id="img-tab-a-1"><img src="pickp_nuoh.JPG" alt="作品"></div>
@@ -215,9 +223,14 @@
     </div>
 
     <script>
-        let currentTab = 'tab-a'; // 今どっちのタブにいるかを記憶
+        let currentTab = 'tab-a'; 
+        let isDetailMode = false; // 👇 今、詳細モードかどうかのフラグ
+        
+        // 👇 スワイプ検知用の変数
+        let touchStartX = 0;
+        let touchStartY = 0;
 
-        // タブを切り替える（一覧モードのとき用）
+        // タブを切り替える
         function switchTab(tabId) {
             currentTab = tabId;
             
@@ -230,19 +243,17 @@
             document.getElementById('list-' + tabId).classList.add('active');
         }
 
-        // 詳細モード（インスタ風）に切り替える
+        // 詳細モードに切り替える
         function showDetailView(detailTabId, imgIndex) {
-            // 一覧を全部非表示にする
+            isDetailMode = true; // 詳細モードON
+            
             document.querySelectorAll('.list-view').forEach(content => content.classList.remove('active'));
-            // タブメニューを消して、戻るボタンを出す
             document.getElementById('tabs-menu').style.display = 'none';
             document.getElementById('back-btn').style.display = 'block';
 
-            // 指定された作風の詳細ギャラリーを表示する
             const detailView = document.getElementById(detailTabId);
             detailView.classList.add('active');
 
-            // クリックした画像の位置まで自動スクロールする
             const targetImg = document.getElementById('img-' + detailTabId.replace('detail-', '') + '-' + imgIndex);
             if (targetImg) {
                 targetImg.scrollIntoView({ behavior: 'auto', block: 'center' });
@@ -251,15 +262,36 @@
 
         // 一覧モードに戻る
         function showListView() {
-            // 詳細モードを全部非表示にする
+            isDetailMode = false; // 詳細モードOFF
+            
             document.querySelectorAll('.detail-view').forEach(content => content.classList.remove('active'));
-            // 戻るボタンを消して、タブメニューを出す
             document.getElementById('back-btn').style.display = 'none';
             document.getElementById('tabs-menu').style.display = 'flex';
 
-            // 元いたタブの一覧モードを表示する
             document.getElementById('list-' + currentTab).classList.add('active');
         }
+
+        // ==================== 3. 左から右へのスワイプ戻り機能 ====================
+        window.addEventListener('touchstart', function(e) {
+            if (!isDetailMode) return; // 詳細モードのときだけ動かす
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+
+        window.addEventListener('touchend', function(e) {
+            if (!isDetailMode) return;
+
+            let touchEndX = e.changedTouches[0].clientX;
+            let touchEndY = e.changedTouches[0].clientY;
+
+            let diffX = touchEndX - touchStartX;
+            let diffY = touchEndY - touchStartY;
+
+            // 左右のスワイプ量が上下より多く、かつ左から右へ「50ピクセル以上」スワイプされたら実行
+            if (diffX > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+                showListView();
+            }
+        }, {passive: true});
     </script>
 
 </body>
