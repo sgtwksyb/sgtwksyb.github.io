@@ -68,7 +68,9 @@
             background: none;
             border: none;
             font-size: 24px;
-            padding: 10px 40px;
+            padding: 10px 20px;     /* 👈 スマホ用に左右の余白を40pxから20pxに縮めて画面内に収める */
+            flex-grow: 1;           /* 👈 4つのボタンが画面幅に等間隔できれいに広がるように設定 */
+            max-width: 100px;       /* ボタンが広がりすぎないように制限 */
             cursor: pointer;
             position: relative;
             opacity: 0.4;
@@ -76,6 +78,14 @@
         }
         .tab-btn.active {
             opacity: 1;
+        }
+
+        /* PCやタブレットなど、画面が広い時は少し余裕を持たせる */
+        @media (min-width: 768px) {
+            .tab-btn {
+                padding: 10px 40px;
+                flex-grow: 0;
+            }
         }
 
         /* 戻るボタン（画面上部に固定） */
@@ -95,7 +105,7 @@
             text-align: left;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            color: #333333; /* 文字色を指定 */
+            color: #333333;
         }
 
         /* ギャラリー部分 */
@@ -159,31 +169,31 @@
         }
 
         /* ==========================================
-            ダークモード
+           ダークモード
            ========================================== */
         @media (prefers-color-scheme: dark) {
             body {
-                background-color: #000000; /* 背景を真っ黒に */
-                color: #ffffff;           /* 全体の文字を白に */
+                background-color: #000000;
+                color: #ffffff;
             }
 
             .sns-links a {
-                color: #66b3ff;           /* ダークモードで見えやすい明るい青に */
+                color: #66b3ff;
             }
 
             .back-btn {
-                background-color: rgba(0, 0, 0, 0.95); /* 戻るバーの背景を黒に */
-                border-bottom: 1px solid #333333;     /* 線の色を暗く */
-                color: #ffffff;                       /* 戻る文字を白に */
+                background-color: rgba(0, 0, 0, 0.95);
+                border-bottom: 1px solid #333333;
+                color: #ffffff;
                 box-shadow: 0 2px 5px rgba(255,255,255,0.05);
             }
 
             .gallery-item {
-                background-color: #1a1a1a; /* 画像読み込み前の背景を暗いグレーに */
+                background-color: #1a1a1a;
             }
 
             .detail-item {
-                background-color: #000000; /* 詳細モードの画像の外枠も真っ黒に */
+                background-color: #000000;
             }
         }
     </style>
@@ -207,13 +217,16 @@
             <button class="tab-btn active" onclick="switchTab('tab-a')">🧸</button>
             <button class="tab-btn" onclick="switchTab('tab-b')">🎨</button>
             <button class="tab-btn" onclick="switchTab('tab-c')">🔪</button>
-            <button class="tab-btn" onclick="switchTab('tab-c')">🗒️</button>
+            <button class="tab-btn" onclick="switchTab('tab-d')">🗒️</button>
         </div>
     </div>
 
     <div class="gallery-container" id="gallery-box"></div>
 
     <script>
+        // ==========================================
+        // 画像データ（4つ目のタブ 'tab-d' を追加！）
+        // ==========================================
         const artworkData = {
             'tab-a': [
                 'patirisutohakama.PNG',
@@ -226,6 +239,9 @@
             'tab-c': [
                 '手持ち燭台と夜.jpg',
                 '工場夜景とモクロー.JPG'
+            ],
+            'tab-d': [
+                // 🗒️タブに入れたい画像ファイルをここに「'名前',」の形で追加していってな！
             ]
         };
 
