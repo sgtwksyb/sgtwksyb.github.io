@@ -33,15 +33,19 @@
             object-fit: cover;
             border: 2px solid #333;
         }
+/* 41行目あたり：名前「とり」の設定 */
         .profile-info h1 {
-            margin: 0 0 10px 0;
-            font-size: 24px;
+            margin: 0 0 5px 0;
+            font-size: 18px;       /* 24pxから18pxに小さく */
+            font-weight: 300;      /* 太さを「細め」に設定 */
         }
+/* 46行目あたり：SNSのリンク設定 */
         .sns-links a {
             margin-right: 15px;
             color: #0066cc;
             text-decoration: none;
-            font-weight: bold;
+            font-size: 13px;       /* サイズを小さく */
+            font-weight: 300;      /* 太さを「細め」に設定 */
         }
 
         /* タブ部分 */
@@ -85,7 +89,7 @@
         .gallery-content {
             display: none;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
+            gap: 0px; /*画像同士の隙間*/
         }
         .gallery-content.active {
             display: grid;
