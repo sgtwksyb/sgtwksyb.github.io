@@ -86,10 +86,21 @@
             width: 100%;
             max-width: 800px;
         }
-        .gallery-content {
+    .gallery-content {
             display: none;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 0px; /*画像同士の隙間*/
+            gap: 0;
+            /* 👇まずは基本（スマホ用）の設定：横3列 */
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        /* 👇画面の横幅が768px以上（タブレットやPC）の時の設定：横5列 */
+        @media (min-width: 768px) {
+            .gallery-content.active {
+                display: grid;
+            }
+            .gallery-content {
+                grid-template-columns: repeat(5, 1fr);
+            }
         }
         .gallery-content.active {
             display: grid;
