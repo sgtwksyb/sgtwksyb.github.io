@@ -208,7 +208,6 @@
                 <a href="https://x.com/sgtwksyb" target="_blank">X: sgtwksyb</a>
                 <a href="https://www.pixiv.net/users/22934515" target="_blank">pixiv: taneco37</a>
             </div>
-            </div>
         </div>
     </div>
 
@@ -411,16 +410,23 @@
             galleryBox.appendChild(detailView);
         });
 
+        // 👈 タブの順番を管理する配列を追加
+        const tabOrder = ['tab-a', 'tab-b', 'tab-c', 'tab-d'];
         let currentTab = 'tab-a'; 
         let isDetailMode = false; 
         let touchStartX = 0;
         let touchStartY = 0;
 
+        // 👈 switchTabの引数を省略しても動くように少し強化
         function switchTab(tabId) {
             currentTab = tabId;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.list-view').forEach(content => content.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            
+            // ボタンの見た目をアクティブにする処理
+            const activeBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
             document.getElementById('list-' + tabId).classList.add('active');
         }
 
@@ -447,20 +453,41 @@
             document.getElementById('list-' + currentTab).classList.add('active');
         }
 
+        // ==========================================
+        // ✨ タッチ（スワイプ）操作のコントロール
+        // ==========================================
         window.addEventListener('touchstart', function(e) {
-            if (!isDetailMode) return;
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         }, {passive: true});
 
         window.addEventListener('touchend', function(e) {
-            if (!isDetailMode) return;
             let touchEndX = e.changedTouches[0].clientX;
             let touchEndY = e.changedTouches[0].clientY;
             let diffX = touchEndX - touchStartX;
             let diffY = touchEndY - touchStartY;
-            if (diffX > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-                showListView();
+
+            // 横方向のスワイプ量が一定以上で、縦揺れが少ない時だけ反応
+            if (Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) {
+                if (isDetailMode) {
+                    // 【詳細モード時】右スワイプで一覧に戻る
+                    if (diffX > 0) {
+                        showListView();
+                    }
+                } else {
+                    // 【一覧モード時】左右スワイプでタブをループ切り替え
+                    let currentIndex = tabOrder.indexOf(currentTab);
+                    
+                    if (diffX > 0) {
+                        // 👉 右にスワイプ（左のタブへ移動）
+                        currentIndex = (currentIndex - 1 + tabOrder.length) % tabOrder.length;
+                    } else {
+                        // 👈 左にスワイプ（右のタブへ移動）
+                        currentIndex = (currentIndex + 1) % tabOrder.length;
+                    }
+                    
+                    switchTab(tabOrder[currentIndex]);
+                }
             }
         }, {passive: true});
     </script>
